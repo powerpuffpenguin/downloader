@@ -191,7 +191,7 @@ type notifier struct {
 func (n *notifier) Reset() {
 	n.Status = downloader_http.StatusIdle
 	n.OutLine = 0
-	n.speed = internal_http.NewSpeed(10)
+	n.speed = nil
 }
 func (n *notifier) Notify(status downloader_http.Status, e error, offset, size int64) {
 	if n.Status == status {
@@ -217,7 +217,7 @@ func (n *notifier) notify(status downloader_http.Status, e error, offset, size i
 func (n *notifier) getSpeed(offset int64) string {
 	speed := n.speed
 	if speed == nil {
-		speed = internal_http.NewSpeed(10)
+		speed = internal_http.NewSpeed(5)
 		n.speed = speed
 	}
 	speed.Push(offset)
