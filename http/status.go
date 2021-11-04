@@ -8,7 +8,6 @@ const (
 	StatusIdle = iota
 	StatusWork
 	StatusDownload
-	StatusExists
 
 	StatusCompleted
 	StatusError
@@ -22,8 +21,6 @@ func (s Status) String() string {
 		return `Work`
 	case StatusDownload:
 		return `Download`
-	case StatusExists:
-		return `Exists`
 	case StatusCompleted:
 		return `Completed`
 	case StatusError:

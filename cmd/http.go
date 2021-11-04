@@ -63,6 +63,7 @@ func init() {
 			}
 			var hash hash.Hash
 			if checksum != `` {
+				checksum = strings.ToUpper(checksum)
 				hash = getHash(checksum)
 				if hash == nil {
 					log.Fatalln(`unknow checksum: `, checksum)
@@ -85,7 +86,7 @@ func init() {
 				}
 
 				fmt.Println(`get`, u, `to`, name)
-				notifier.Reset()
+				notifier.Reset(name, checksum, hash)
 				worker := downloader_http.New(u.String(), name, opts...)
 				if hash != nil {
 					hash.Reset()
@@ -140,7 +141,7 @@ func init() {
 }
 
 func getHash(name string) hash.Hash {
-	switch strings.ToUpper(name) {
+	switch name {
 	case `MD4`:
 		return crypto.MD4.New()
 	case `MD5`:
@@ -190,14 +191,21 @@ type notifier struct {
 	status                   downloader_http.Status
 	speedWork, speedDownload *internal_http.Statistics
 	offset                   int64
+
+	name, checksum string
+	hash           hash.Hash
 }
 
-func (n *notifier) Reset() {
+func (n *notifier) Reset(name, checksum string, hash hash.Hash) {
 	n.Status = downloader_http.StatusIdle
 	n.OutLine = 0
 	n.speedWork = nil
 	n.speedDownload = nil
 	n.offset = 0
+
+	n.name = name
+	n.checksum = checksum
+	n.hash = hash
 }
 func (n *notifier) Notify(status downloader_http.Status, e error, offset, size int64) {
 	if n.Status == status {
@@ -220,6 +228,13 @@ func (n *notifier) notify(status downloader_http.Status, e error, offset, size i
 	case downloader_http.StatusDownload:
 		n.PrintLine(status, n.strWork(offset, size), n.getSpeed(offset, size, true))
 		n.status = status
+	case downloader_http.StatusCompleted:
+		if n.hash == nil {
+			n.PrintLine(status, ": ", n.name)
+		} else {
+			hex := hex.EncodeToString(n.hash.Sum(nil))
+			n.PrintLine(status, ": ", n.name, " ", n.checksum, "<", hex, ">")
+		}
 	default:
 		n.PrintLine(status)
 	}

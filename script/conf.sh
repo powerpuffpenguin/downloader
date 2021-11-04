@@ -1,7 +1,7 @@
 Target="downloader"
 Docker="github.com/powerpuffpenguin/downloader"
 Dir=$(cd "$(dirname $BASH_SOURCE)/.." && pwd)
-Version="v0.0.1"
+Version="v1.0.0"
 View=0
 Platforms=(
     darwin/amd64
