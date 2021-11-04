@@ -30,8 +30,10 @@ func (w *writer) Write(p []byte) (n int, err error) {
 	w.offset += count
 	if w.Sync {
 		w.sync(count)
+		w.notifier.Notify(StatusDownload, nil, w.offset, w.ContentLength)
+	} else {
+		w.notifier.Notify(StatusWork, nil, w.offset, w.ContentLength)
 	}
-	w.notifier.Notify(StatusWork, nil, w.offset, w.ContentLength)
 	return len(p), nil
 }
 func (w *writer) sync(count int64) {

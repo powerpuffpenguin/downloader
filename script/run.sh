@@ -84,10 +84,10 @@ cd "$Dir/bin"
 #     -c "md5" -s "2c8b9617c01a1df9094c23923b3c8119"
 #     "http://127.0.0.1/tools/webpc.exe"
 # )
-args=(
-    ./"$Target" http -j
-    "https://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04.3-live-server-arm64.iso?_ga=2.128947468.127847272.1635919872-540741830.1635919872"
-)
+# args=(
+#     ./"$Target" http -j
+#     "https://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04.3-live-server-arm64.iso?_ga=2.128947468.127847272.1635919872-540741830.1635919872"
+# )
 # args=(
 #     ./"$Target" http -j
 #     -c "md5" -s "2c8b9617c01a1df9094c23923b3c8119"

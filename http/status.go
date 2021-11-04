@@ -7,6 +7,7 @@ type Status int
 const (
 	StatusIdle = iota
 	StatusWork
+	StatusDownload
 	StatusExists
 
 	StatusCompleted
@@ -19,6 +20,8 @@ func (s Status) String() string {
 		return `Idle`
 	case StatusWork:
 		return `Work`
+	case StatusDownload:
+		return `Download`
 	case StatusExists:
 		return `Exists`
 	case StatusCompleted:

@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	internal_http "github.com/powerpuffpenguin/downloader/cmd/internal/http"
 	downloader_http "github.com/powerpuffpenguin/downloader/http"
@@ -185,13 +186,18 @@ func getHash(name string) hash.Hash {
 type notifier struct {
 	internal_http.Outputer
 	Status downloader_http.Status
-	speed  *internal_http.Speed
+
+	status                   downloader_http.Status
+	speedWork, speedDownload *internal_http.Statistics
+	offset                   int64
 }
 
 func (n *notifier) Reset() {
 	n.Status = downloader_http.StatusIdle
 	n.OutLine = 0
-	n.speed = nil
+	n.speedWork = nil
+	n.speedDownload = nil
+	n.offset = 0
 }
 func (n *notifier) Notify(status downloader_http.Status, e error, offset, size int64) {
 	if n.Status == status {
@@ -209,23 +215,64 @@ func (n *notifier) notify(status downloader_http.Status, e error, offset, size i
 	case downloader_http.StatusError:
 		n.PrintLine(status, ": ", e)
 	case downloader_http.StatusWork:
-		n.PrintLine(status, n.strWork(offset, size), n.getSpeed(offset))
+		n.PrintLine(status, n.strWork(offset, size), n.getSpeed(offset, size, false))
+		n.status = status
+	case downloader_http.StatusDownload:
+		n.PrintLine(status, n.strWork(offset, size), n.getSpeed(offset, size, true))
+		n.status = status
 	default:
 		n.PrintLine(status)
 	}
 }
-func (n *notifier) getSpeed(offset int64) string {
-	speed := n.speed
-	if speed == nil {
-		speed = internal_http.NewSpeed(5)
-		n.speed = speed
+func (n *notifier) getSpeed(offset, size int64, download bool) string {
+	if download {
+		if n.speedWork != nil {
+			n.speedWork = nil
+			n.offset = 0
+		}
+	} else {
+		if n.speedDownload != nil {
+			n.speedDownload = nil
+			n.offset = 0
+		}
 	}
-	speed.Push(offset)
-	v := speed.Get()
+	if n.offset == 0 {
+		n.offset = offset
+		return ""
+	}
+	var speed *internal_http.Statistics
+	if download {
+		speed = n.speedDownload
+		if speed == nil {
+			speed = internal_http.NewStatistics(5 * time.Second)
+			n.speedDownload = speed
+		}
+	} else {
+		speed = n.speedWork
+		if speed == nil {
+			speed = internal_http.NewStatistics(5 * time.Second)
+			n.speedWork = speed
+		}
+	}
+
+	if offset > n.offset {
+		speed.Push(offset - n.offset)
+		n.offset = offset
+	}
+	v := speed.Speed()
 	if v == 0 {
 		return ""
 	}
-	return fmt.Sprintf(" [%s/s]", n.strSize(v))
+	if !download {
+		return fmt.Sprintf(" [%s/s]", n.strSize(v))
+	}
+	var eta string
+	if offset < size {
+		wait := float64(size - offset)
+		durantion := time.Duration(wait/float64(v)*1000) * time.Millisecond
+		eta = fmt.Sprintf(" %s ETA", durantion.String())
+	}
+	return fmt.Sprintf(" [%s/s]%s", n.strSize(v), eta)
 }
 func (n *notifier) strWork(offset, size int64) string {
 	if offset > 0 {
