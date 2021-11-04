@@ -253,6 +253,10 @@ func (w *Worker) append() (e error) {
 	if e != nil {
 		return
 	}
+	if len(w.opts.sum) == 0 && db.Offset == 0 {
+		e = w.downloadTrunc()
+		return
+	}
 	db.CheckSumAll(w.opts.sum)
 	w.db = db
 
