@@ -21,7 +21,9 @@ func NewDecoder(r io.Reader, j bool) Decoder {
 }
 func NewEncoder(w io.Writer, j bool) Encoder {
 	if j {
-		return json.NewEncoder(w)
+		encoder := json.NewEncoder(w)
+		encoder.SetIndent("", "\t")
+		return encoder
 	}
 	return gob.NewEncoder(w)
 }

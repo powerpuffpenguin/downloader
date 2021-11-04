@@ -171,7 +171,7 @@ func (w *Worker) download(writer io.Writer) (e error) {
 		h1 = w.opts.hash
 		wm io.Writer
 	)
-	w.writer = newWriter(db, w.opts.notifier, 0, h0)
+	w.writer = newWriter(db, w.opts.notifier, 0, h0, w.opts.sync)
 	w.writer.ContentLength = contentLength
 	if h1 == nil {
 		wm = io.MultiWriter(
@@ -279,7 +279,7 @@ func (w *Worker) append() (e error) {
 		h1               = w.opts.hash
 		writer io.Writer
 	)
-	w.writer = newWriter(db, w.opts.notifier, 0, h0)
+	w.writer = newWriter(db, w.opts.notifier, 0, h0, w.opts.sync)
 	w.writer.Sync = false
 	if h1 == nil {
 		writer = io.MultiWriter(h0,

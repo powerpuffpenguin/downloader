@@ -9,6 +9,7 @@ import (
 var defaultOptions = options{
 	client: http.DefaultClient,
 	ctx:    context.Background(),
+	sync:   1024 * 1024 * 5,
 }
 
 type options struct {
@@ -22,6 +23,7 @@ type options struct {
 	hash hash.Hash
 
 	json bool
+	sync int64
 }
 
 type Option interface {
@@ -83,5 +85,12 @@ func WithHash(hash hash.Hash, sum []byte) Option {
 func WithJSON(json bool) Option {
 	return newFuncOption(func(o *options) {
 		o.json = json
+	})
+}
+
+// WithSync whenever the specified length of data is downloaded, the download status is synchronized
+func WithSync(sync int64) Option {
+	return newFuncOption(func(o *options) {
+		o.sync = sync
 	})
 }

@@ -26,6 +26,7 @@ func init() {
 		sumhex   []string
 		header   []string
 		json     bool
+		sync     int64
 	)
 	exec := App + ` http`
 	cmd := &cobra.Command{
@@ -50,6 +51,7 @@ func init() {
 			opts := []downloader_http.Option{
 				downloader_http.WithNotifier(notifier),
 				downloader_http.WithJSON(json),
+				downloader_http.WithSync(sync),
 			}
 			m := make(http.Header)
 			for _, h := range header {
@@ -136,7 +138,10 @@ func init() {
 		false,
 		`use json encoding to download the status file`,
 	)
-
+	flags.Int64Var(&sync, `sync`,
+		1024*1024*5,
+		`whenever the specified length of data is downloaded, the download status is synchronized`,
+	)
 	rootCmd.AddCommand(cmd)
 }
 
