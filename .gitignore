@@ -22,6 +22,7 @@
 *.log
 *.iso
 *sha256
+*.tgz
 
 /assets/
 /static/3rdpartylicenses.txt

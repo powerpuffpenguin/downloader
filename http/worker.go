@@ -194,10 +194,9 @@ func (w *Worker) download(writer io.Writer) (e error) {
 	}
 	db.SumAll = db.SumOffset
 
-	count := len(db.SumAll)
-	if h1 != nil && count != 0 {
+	if h1 != nil && len(w.opts.sum) != 0 {
 		v := h1.Sum(nil)
-		if !bytesEqual(v, db.SumAll) {
+		if !bytesEqual(v, w.opts.sum) {
 			db.Sync()
 			e = ErrNotMatch
 			return
